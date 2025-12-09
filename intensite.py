@@ -1,6 +1,16 @@
 import os, sys, re
 
-'''2 entrées : fichier de valeurs et taille de fenetre'''
+'''
+entrées : fichier .txt de valeurs et taille de fenetre (float)
+
+rendu : 
+- affichage pour chaque intervalle des différentes informations demandées
+- un fichier index.txt contenant pour chaque ligne les informations
+
+Une suggestion pour aller plus loin : 
+au lieu d'afficher pour chaque intervalle, voir pour n'afficher que celles comprises dans l'intervalle 
+renseigné par l'utilisateur dans recherche_plot.py ?
+'''
 
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##

@@ -2,7 +2,7 @@ import os, sys, re
 import matplotlib.pyplot as plt
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
-#                    FONCTIONS                    #
+#                    FONCTION                     #
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
 def txt_en_dico(fd):
@@ -47,17 +47,10 @@ res=txt_en_dico(open("index.txt"))      # dictionnaire des informations de inten
 pas = float(sys.argv[1])                # en nm
 
 
-
-######################################################
-######################################################
-### FAUT FAIRE DAVANTAGE DE CHECK pr etre sur que user donne de bons trucs
-######################################################
-######################################################
-
-
 ###~~~~~~~~~~~~~~~~~~~~~###
 # demande de l'intervalle #
 ###~~~~~~~~~~~~~~~~~~~~~###
+
 '''
 Ici choix d'un intervalle entier.
 Un intervalle en float aurait pu être envisagé
@@ -95,18 +88,17 @@ while not pas.is_integer():
 index = [f"{round(float(i*10**(-cpt)),cpt)}-{round(i*10**(-cpt)+pas*10**(-cpt),cpt)}" for i in range(infe*10**cpt,supe*10**cpt,int(pas))]
 
 
-
 ###~~~~~~~~~~~~~~~~~###
 # partie pour le plot #
 ###~~~~~~~~~~~~~~~~~###
 
-# x : abscisse, y : ordonnée
 x,y = [],[]                                     # liste des clefs que demande l'utilisateur et qui existent, liste des moyennes par intervalle
+# x : abscisse, y : ordonnée
 
 mini,maxi = [],[]                               # liste des valeurs minimales et maximales pour l'incertitude 
 
 for i in index:
-    if i in res.keys() and len(res[i])>0:   # cond 1 : au cas où on demande un index qui n'existe pas chez nous | cond 2 : au cas où il n'y a pas de valeur
+    if i in res.keys() and len(res[i])>0:       # cond 1 : au cas où on demande un index qui n'existe pas chez nous | cond 2 : au cas où il n'y a pas de valeur
         y.append(res[i][2])
         x.append(i)
         maxi.append(res[i][3])
@@ -121,7 +113,7 @@ Il est possible d'avoir énormément d'indices en abscisse, rendant le plot illi
 les variables suivantes ainsi que plt.xticks() permettent de pallier ce problème
 '''
 
-nb = 100                 # choix arbitraire du nombre d'indices en abscisse
+nb = 100                                        # choix arbitraire du nombre d'indices en abscisse
 position = range(len(x))
 pasAbscisse = max(1,len(x)//nb)
 
@@ -130,7 +122,6 @@ pasAbscisse = max(1,len(x)//nb)
 ###~~~~~~~~~~~~~~~###
 
 plt.figure(figsize=(14,10))
-plt.figure()
 
 plt.plot(x,y,'b')                                               # plot normal sans incertitude
 plt.errorbar(x,y,yerr=incert, fmt='o', capsize=3, ecolor='red') # pour avoir aussi les incertitudes
