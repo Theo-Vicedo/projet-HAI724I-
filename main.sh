@@ -1,8 +1,5 @@
 clear
 
-#########"
-#### NB : POUR LE GIT : on pourrait le faire via codium"
-
 
 
 ## aussi verif la véracité des données demandées
@@ -50,3 +47,11 @@ python3 recherche_plot.py "$TAILLE"
 
 ## readme de github : dire que le f index.txt est donné par intensite et que recherche plot l'use
 ## + expliquer pourquoi utiliser une liste ou un dico
+# + en gros des infos sur :
+
+# requirements / module to install
+# usage / command line (en gros moi : ./main.sh Spectre_photoluminescence.txt 1)
+# input data / arguments / parametres
+# output / files / plots / stats...
+# licence (CC)
+# authors noms/<email>

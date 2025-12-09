@@ -2,126 +2,118 @@ import os, sys, re
 
 '''2 entrées : fichier de valeurs et taille de fenetre'''
 
+
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 #                    FONCTIONS                    #
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
-## moyenne :
-def moy(liste): return sum(liste)/len(liste)
-#NB : certains modules la nomment mean, donc ici c'est moy
+### moyenne
+def moyenne(liste): return sum(liste)/len(liste) # NB : certains modules la nomment mean
 
-###################################
-## 1e partie : fichier into dico ##
-###################################
+
+### I/ lecture du fichier & conversion en dictionnaire
 def file_en_dico(fd,pas):
     '''
-    ICI pas PEUT ETRE DECIMAL
+    On suppose le fichier trié par longueur d'onde croissante.
+    Le pas peut être décimal. 
     '''
-    lignes = fd.readlines()                                                              # on prend toutes les lignes du fichier fd
-    # NB : on suppose notre fichier trié par longueurs d'onde
 
-    ## INIT
-    long_onde = []                                                                       # pour les clefs du dico
-    intensite = []                                                                       # pour les valeurs du dico
-    for l in lignes:
-        if l and (l[0] in ('123456789')) :                                               # check si l est une ligne avec les valeurs voulues
+    ## LECTURE FICHIER
+    lignes = fd.readlines()                         # on prend toutes les lignes du fichier .txt
+    long_onde = []                                  # pour les clefs du dictionnaire
+    intensite = []                                  # pour les valeurs du dictionnaire
+
+    for l in lignes:             
+        if l and (l[0] in ('123456789')) :          # vérifie si l est une ligne avec les valeurs voulues
             data = l.split("\t")
             long_onde.append(float(data[0].strip()))
             intensite.append(float(data[1].strip())) 
 
+    ## INITIALISATION DU DICTIONNAIRE
+    borne_inf=0.0                                   # borne inférieure des intervalles
+    dico = {f"{borne_inf}-{borne_inf+pas}":[]}      # initialise le dictionnaire avec la clef "0-10" (valeur = liste vide)
 
-    # le faire directement ds la boucle du haut
-
-    ## LE DICO
-    tps=0.0                                                                              # borne inf des intervalles
-    dico = {f"{tps}-{tps+pas}":[]}                                                       # init le dico avec 1 clef : "0-10"
-
-
-    # POUR ARRONDIR LE PAS CORRECTEMENT 
+    ## ARRONDIR CORRECTEMENT LE PAS
     cpt=0
     while not pas.is_integer():
         cpt+=1
         pas*=10
+    # arrondir le pas permet de savoir combien de décimales prendre pour les clefs du dictionnaire
 
- ## REMPLISSAGE DU DICO AVEC CLEFS ET VALEURS
+    ## REMPLISSAGE DU DICTIONNAIRE
     for i in range(0,len(long_onde)):
-        while long_onde[i]>=tps+pas*10**(-cpt):                                          # check si hors de la fenêtre
-            tps+=pas*10**(-cpt)                                                          # incrémente du pas
-            dico[f"{round(tps,cpt)}-{round(tps+pas*10**(-cpt),cpt)}"]=[]                 # création nouvelle fenêtre (référente)
-        dico[f"{round(tps,cpt)}-{round(tps+pas*10**(-cpt),cpt)}"].append(intensite[i])   # ajout à la fenêtre qui correspond
-    
-
+        while long_onde[i]>=borne_inf+pas*10**(-cpt):                                               # vérifie si la longueur d'onde est hors de la fenêtre référente
+            borne_inf+=pas*10**(-cpt)                                                               # incrémente du pas
+            dico[f"{round(borne_inf,cpt)}-{round(borne_inf+pas*10**(-cpt),cpt)}"]=[]                # création d'une nouvelle fenêtre (référente)
+        dico[f"{round(borne_inf,cpt)}-{round(borne_inf+pas*10**(-cpt),cpt)}"].append(intensite[i])  # ajout à la fenêtre qui correspond
+        
     ## TRI DES VALEURS
     for key in dico.keys():
         dico[key].sort()
 
     return dico
 
-####################################################
-## 2e partie : infos sur les fenetres d'intensité ##
-####################################################
+
+### II/ Informations sur chaque fenêtre d'intensité
 def data_intensites(dico):
     ''' 
-    DANS LE DICO res : 
-    - clefs - mêmes que pour le premier dico
-    - valeurs - liste avec 4 éléments :
-        nb de données d'intensité
-        val min de données d'intensité
-        val moyen de données d'intensité
-        val max de données d'intensité
+    dictionnaire res : 
+    - clefs - mêmes clefs que le dictionnaire en entrée : les fenêtres d'intensité
+    - valeurs - liste avec 4 informations sur les données :
+        nombre de données
+        valeur mininimale
+        valeur moyenne
+        valeur maximale
         --> len,min,mean,max
-    NB : on aurait pu en faire un tuple au lieu d'une liste pour gain de place
+    NB : ici le choix d'une liste pour les stocker a été fait, mais un tuple aurait pu être envisagé.
     '''
     res={}
 
     for key in dico.keys():
-        a = dico[key]                                                                # pr aller plus vite dans écriture
-        if a:                                                                        # check si a n'est pas vide
-            res[key]=[len(a),a[0],moy(a),a[-1]]
-            # ici a est ordonnée donc a[0] et a[-1] = min et max
+        if dico[key]:                                                                # vérifie que la valeur du dictionnaire ne soit pas vide
+            res[key]=[len(dico[key]),dico[key][0],moyenne(dico[key]),dico[key][-1]]  # chaque valeur de dico est ordonnée, donc a[0] et a[-1] = min et max
         else :
-            res[key]=[]                                                              # tuple vide si intervalle vide
+            res[key]=[]                                                              # liste vide si aucune donnée pour l'intensité
 
-    return res                                                                       # renvoie le dico demandé
-
-
-###################
-# EXEC POUR LE BASH
-###################
-fd = open(sys.argv[1])                          # fichier des données
-pas = float(sys.argv[2])                        # pas, en nm
-
-####
-a = file_en_dico(fd,pas)                        # le fichier avec les données converti en dico
-res = data_intensites(a)                        # données demandées pour intensite.py
+    return res
 
 
-#~~~~~~~~~~~~~~~~~~~~#
-# print des fenêtres #
-#~~~~~~~~~~~~~~~~~~~~#
-## NB : 
-for key in res.keys():
+###~~~~~~~~~~~~~~~~~###
+# Partie pour main.sh #
+###~~~~~~~~~~~~~~~~~###
+
+fd = open(sys.argv[1])                          # ouverture du fichier des données
+pas = float(sys.argv[2])                        # le pas, en nm
+
+a = file_en_dico(fd,pas)                        # le fichier converti en dictionnaire
+dic_info = data_intensites(a)                   # dictionnaire des informations demandées pour intensite.py
+
+
+###~~~~~~~~~~~~~~~~~~~~###
+# affichage des fenêtres #
+###~~~~~~~~~~~~~~~~~~~~###
+
+for key in dic_info.keys():
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     print('Fenêtre ',key,'(nm) :')
-    if len(res[key])>0:
-        print('nombre de données : ',res[key][0])
-        print('valeur min : ',res[key][1])
-        print('moyenne : ',res[key][2]) # modifier en fonction du pas pr le nb de décimales  ou %.2f
-        print('valeur max : ',res[key][3])
+    if len(dic_info[key])>0:
+        print('nombre de données : ',dic_info[key][0])
+        print('valeur min : ',dic_info[key][1])
+        print('moyenne : ',round(dic_info[key][2],2)) # arrondi au centième près, choix arbitraire. Aurait pu se faire en fonction du nombre de décimales du pas
+        print('valeur max : ',dic_info[key][3])
     else:
         print('Pas de valeur.')
 
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# MISE DU DICTIONNAIRE DANS UN .TXT #
+# mise du dictionnaire dans un .txt #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# on crée le fichier et on met pour chaque ligne les infos du dico
-# structure type d'une ligne : clef:count,min,mean,max
+# on crée le fichier et on met pour chaque ligne les informations du dictionnaire
+# structure type d'une ligne : 
+# clef:count,min,mean,max
 
 with open("index.txt", "w") as f: 
-    for fenetre, stats in res.items():
-        # stats = [count, min, moyenne, max]
+    for fenetre, stats in dic_info.items():
         ligne = f"{fenetre}:{','.join(map(str, stats))}\n"
         f.write(ligne)
