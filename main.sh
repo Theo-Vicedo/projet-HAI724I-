@@ -2,57 +2,58 @@ clear
 
 
 # Type de fichier demandé : fichier.txt contenant les données sous forme :
-# intensité   longueur d'onde'
+# intensité \t longueur d'onde
 
 
 
 
 
-## aussi verif la véracité des données demandées
-
-
-
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#   VERIFICATION DES ENTREES   #
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # vérification du nombre d'indices
-if [ $# -lt 1 ]; then
-    echo "Erreur de format de ligne de commande."
-    echo "Format demandé : $0 fichier_spectre.txt taille_fenetre"
-    exit 1
+if [ $# -lt 1 ]; then                           # vérifie le nombre d'arguments donnés
+    echo "Erreur de format."
+    echo "Format demandé : $0 fichier_spectre.txt taille_fenêtre"
+    exit 1                                      # pour arrêter le script à cause d'une erreur
 fi
 
-FICHIER=$1          # variable pour le fichier
-TAILLE=${2:-10}     # variable pour la taille de la fenêtre, 10 par défaut si non fourni
 
-# Vérification que le fichier est trouvé
-if [ ! -f "$FICHIER" ]; then
+FICHIER=$1                                      # variable pour le fichier
+
+# vérification que le fichier est trouvé
+if [ ! -f "$FICHIER" ]; then                    # vérifie que l'argument donné est un fichier qui existe
     echo "Erreur : fichier '$FICHIER' introuvable."
     exit 1
 fi
 
 
+TAILLE=${2:-10}                                 # variable pour la taille de la fenêtre, 10 par défaut si non fourni
+# si un second indice est fourni, alors taille n'est pas forcément un nombre.
 
+# vérifie que TAILLE est un nombre positif
+if ! [[ "$TAILLE" =~ ^([0-9]+([.][0-9]+)?|[.][0-9]+)$ ]]; then
+    echo "Erreur : taille_fenetre doit être un nombre (ex: 10, 2.5, 0.25)."
+    exit 1
+fi
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#   EXECUTION DES DEUX SCRIPTS PYTHON   #
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+# 1er script : intensité
 echo "#############################################################"
 echo "Indexation des intensités avec une fenêtre de $TAILLE nm :"
-python3 intensite.py "$FICHIER" "$TAILLE"
-echo "    "
+python3 intensite.py "$FICHIER" "$TAILLE"   # rappel : il crée un .txt contenu les informations pour chaque intervalle
 
+echo "    "     
 
+#2ème script : recherche_plot
 echo "#############################################################"
 echo "Affichage graphique :"
-python3 recherche_plot.py "$TAILLE"
-
-
-
-
-## readme de github : dire que le f index.txt est donné par intensite et que recherche plot l'use
-## + expliquer pourquoi utiliser une liste ou un dico
-# + en gros des infos sur :
-
-# requirements / module to install
-# usage / command line (en gros moi : ./main.sh Spectre_photoluminescence.txt 1)
-# input data / arguments / parametres
-# output / files / plots / stats...
-# licence (CC)
-# authors noms/<email>
+python3 recherche_plot.py "$TAILLE"         # rappel : utilise le .txt du premier script pour tracer le graphique.
