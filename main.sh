@@ -2,7 +2,7 @@ clear
 
 
 # Type de fichier demandé : fichier.txt contenant les données sous forme :
-# intensité \t longueur d'onde
+# longueur_donde \t intensite 
 
 
 
